@@ -17,13 +17,13 @@ typedef enum
 	DQUOTE,
 }	arg_type;
 
-typedef s_elem
+typedef struct s_elem
 {
 	char	*value;
-	enum arg_type	type;
+	arg_type	type;
 }	t_elem;
 
-typedef s_stack
+typedef struct s_stack
 {
 	t_elem *elem;
 	struct s_stack	*previous;

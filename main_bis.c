@@ -1,5 +1,19 @@
 #include "minishell.h"
 
+size_t	ft_strlen(const char *str)
+{
+	int		i;
+
+	if (str != NULL)
+	{
+		i = 0;
+		while (str[i])
+			i++;
+		return (i);
+	}
+	return (0);
+}
+
 static int	ft_char_in_set(char c, char const *set)
 {
 	size_t	i;
@@ -39,23 +53,129 @@ char	*ft_strtrim(char const *s1, char const *set)
 	return (str);
 }
 
+int	tab_size(char *str)
+{
+	int	i;
+	int	count;
+
+	i = 0;
+	count = 0;
+	while(str && str[i])
+	{
+		if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z') || str[i] == '/')
+		{
+			count++;
+			while (str[i] && ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z')
+                    || str[i] == '/' || str[i] == '-'))
+                i++;
+		}
+		if (str[i] == '<')
+        {
+			count++;
+            while (str[i] && str[i] == '<')
+                i++;
+        }
+		if (str[i] == '>')
+        {
+			count++;
+            while (str[i] == '>')
+                i++;
+        }
+		if (str[i] == '\'')
+        {
+			count++;
+            while (str[i] && str[i] == '\'')
+                i++;
+        }
+		if (str[i] == '"')
+        {
+			count++;
+            while (str[i] && str[i] == '"')
+                i++;
+        }
+        if (str[i] == '|')
+        {
+			count++;
+            while (str[i] && str[i] == '|')
+                i++;
+        }
+		i++;
+    }
+	return (count);
+}
+
 char	**tab(char *av)
 {
 	int	i;
 	int	start;
-	int	end;
+	int	j;
 	char	**tab;
 	char *str;
 	
 	str = ft_strtrim(av, " ");
-	i = 0;
-	while(av && av[i] && av[i] == ' ')
-		i++;
-	while(av && av[i])
+    if (!str)
 	{
-		start = i;
-		while (av[i] && av[i] >= 'a' && av[i] )
+		free(str);
+        return (NULL);
 	}
+	tab = calloc(tab_size(str) + 1, sizeof(char*));
+	i = 0;
+	j = 0;
+    while (str[i])
+    {
+        if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z') || str[i] == '/')
+        {
+			start = i;
+            while (str[i] && ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z')
+                    || str[i] == '/' || str[i] == '-'))
+                i++;
+			tab[j] = strndup(&str[start], i - start);
+			j++;
+        }
+        else if (str[i] == '<')
+        {
+			start = i;
+            while (str[i] && str[i] == '<')
+                i++;
+			tab[j] = strndup(&str[start], i - start);
+			j++;
+        }
+        else if (str[i] == '>')
+        {
+			start = i;
+            while (str[i] == '>')
+                i++;
+			tab[j] = strndup(&str[start], i - start);
+			j++;
+        }
+        else if (str[i] == '\'')
+        {
+			start = i;
+            while (str[i] && str[i] == '\'')
+                i++;
+			tab[j] = strndup(&str[start], i - start);
+			j++;
+        }
+        else if (str[i] == '"')
+        {
+			start = i;
+            while (str[i] && str[i] == '"')
+                i++;
+			tab[j] = strndup(&str[start], i - start);
+			j++;
+        }
+        else if (str[i] == '|')
+        {
+			start = i;
+            while (str[i] && str[i] == '|')
+                i++;
+			tab[j] = strndup(&str[start], i - start);
+			j++;
+        }
+		i++;
+    }
+    free(str);
+	return (tab);
 }
 
 t_token *create_token_stack(char **av)
@@ -119,6 +239,7 @@ void free_token_stack(t_token *head) {
     }
 }
 
+/*
 int main() {
     char *av[] = {"<command", "arg1", "<", "|", "env_var", NULL};
 
@@ -127,6 +248,30 @@ int main() {
 
     // Free the allocated memory
     free_token_stack(token_stack);
+
+    return 0;
+}
+*/
+
+int main() {
+    char input[] = "hello world >cat | ls file.txt | command";
+    char **result = tab(input);
+
+    if (result == NULL) {
+        printf("Erreur : échec de l'allocation mémoire.\n");
+        return 1;
+    }
+
+    printf("Résultat :\n");
+    for (int i = 0; result[i] != NULL; i++) {
+        printf("Token %d: %s\n", i, result[i]);
+    }
+
+    // Libérer la mémoire
+    for (int i = 0; result[i] != NULL; i++) {
+        free(result[i]);
+    }
+    free(result);
 
     return 0;
 }

@@ -99,7 +99,8 @@ int	tab_size(char *str)
             while (str[i] && str[i] == '|')
                 i++;
         }
-		i++;
+		else
+			i++;
     }
 	return (count);
 }
@@ -172,7 +173,8 @@ char	**tab(char *av)
 			tab[j] = strndup(&str[start], i - start);
 			j++;
         }
-		i++;
+		else
+			i++;
     }
     free(str);
 	return (tab);
